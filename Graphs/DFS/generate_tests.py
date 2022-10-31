@@ -3,7 +3,7 @@ import os
 
 
 if not os.path.exists("/".join(os.path.abspath(__file__).split("/")[:-1]) + "/tests/"):
-    os.mkdir("".join(os.path.abspath(__file__).split("/")[:-1]) + "/tests/")
+    os.mkdir("/".join(os.path.abspath(__file__).split("/")[:-1]) + "/tests/")
 
 for i in range(50):
     with open(os.path.dirname(os.path.abspath(__file__)) + "/tests/test_" + str(i) + ".txt", "w") as file:
