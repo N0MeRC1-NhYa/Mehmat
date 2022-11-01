@@ -4,7 +4,7 @@ import os
 import math
 import numpy as np
 
-for j in range(4, 5): 
+for j in range(1, 5): 
     
     graph = []
     
