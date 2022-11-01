@@ -2,7 +2,7 @@
 # где а, b, c, d неизвестные целые положительные числа. 
 # Решить 2 способами: полным перебором; с помощью генетического алгоритма
 
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -19,12 +19,14 @@ def default_run():
                     default_iter_cnt += 1
                     if equation(a, b, c, d) == 0:
                         print(default_iter_cnt)
-                        return [a, b, c, d]
+                        return (default_iter_cnt, [a, b, c, d])
     
 
 
 def genetic(population_size, mutation):
-
+    
+    epoch = 0
+    
     population = [[np.random.randint(1, 30),
                 np.random.randint(1, 30),
                 np.random.randint(1, 30), 
@@ -36,7 +38,7 @@ def genetic(population_size, mutation):
         for a, b, c, d in population:
 
             if equation(a, b, c, d) == 0:
-                return [a, b, c, d]
+                return (epoch, [a, b, c, d])
             
             fitness_score.append(1 / equation(a, b, c, d))
         
@@ -70,8 +72,44 @@ def genetic(population_size, mutation):
             m = np.random.random()
             if m < mutation:
                 population[i][np.random.randint(1, 4)] = np.random.randint(1, 31)
+        
+        epoch += 1
+        
+        if epoch > 10000:
+            return (epoch, "Not found") 
                 
         
         
-    
+        
+print(default_run())
 print(genetic(50, 0.5))
+
+x, y = [], []
+
+for popul in range(5, 101, 5):
+    x.append(popul)
+    y.append(genetic(popul, 0.5)[0])
+    print(f"Current population: {popul}")
+
+plt.plot(x, y)
+plt.title("Зависимость числа эпох от популяции")
+plt.ylabel("Количество эпох")
+plt.xlabel("Популяция")
+plt.show()
+
+plt.clf()
+
+x, y = [], []
+
+for mutat in np.arange(0, 1, 0.1):
+    x.append(mutat)
+    y.append(genetic(50, mutat)[0])
+    print(f"Current mutation: {mutat}")
+
+plt.plot(x, y)
+plt.title("Зависимость числа эпох от вероятности мутации")
+plt.ylabel("Количество эпох")
+plt.xlabel("Вероятность мутации")
+plt.show()
+
+
