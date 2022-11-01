@@ -18,7 +18,6 @@ def default_run():
                 for  d in range(1, 7):
                     default_iter_cnt += 1
                     if equation(a, b, c, d) == 0:
-                        print(default_iter_cnt)
                         return (default_iter_cnt, [a, b, c, d])
     
 
@@ -80,9 +79,11 @@ def genetic(population_size, mutation):
                 
         
         
-        
-print(default_run())
-print(genetic(50, 0.5))
+def_res =default_run()
+print(f"В ходе работы полного перебора было совершено {def_res[0]} итераций. Итоговый ответ: {def_res[1]}")
+gen_res = genetic(50, 0.5)
+print(f"В ходе работы генетического алгоритма было задействовано {def_res[0]} эпох. Итоговый ответ: {def_res[1]}")
+print("Построение графиков...")
 
 x, y = [], []
 
