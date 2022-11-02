@@ -1,23 +1,11 @@
 # Построение линейного остовного дерева, 
 # взвешенного, связанного, неориентированного 
 # графа двумя методами (алгоритм Прима, алгоритм Краскаля)
+import os
 import networkx as  nx
 import matplotlib.pyplot as plt
 import numpy as np
 
-n = 7
-
-edges = [[1, 2, 3],
-         [0, 3, 4],
-         [3, 5, 2],
-         [2, 4, 5],
-         [4, 6, 3], 
-         [5, 2, 2],
-         [1, 5, 7],
-         [0, 4, 4],
-         [4, 3, 7],
-         [2, 3, 5],
-         [0, 6, 5]]
 
 def Kraskal(g_edges):
     
@@ -74,7 +62,7 @@ def draw_graph(alg_res, alg_title):
     G = nx.Graph()
     G.add_weighted_edges_from(edges)
 
-    pos = nx.shell_layout(G)
+    pos = nx.spring_layout(G)
 
     nx.draw_networkx_nodes(G, pos, node_size=700)
     nx.draw_networkx_edges(G, pos, width=4, alpha = 0.5,  edge_color="b")      
@@ -88,9 +76,17 @@ def draw_graph(alg_res, alg_title):
     plt.title(f"{alg_title} MST")
     plt.show()  
 
+for j in range(1, 5):
+    
+    edges = []
+    with open(os.path.dirname(os.path.abspath(__file__)) + "/tests/test_"  + str(j) + ".txt", "r") as file:
+        n = int(file.readline())    
+        
+        while line := file.readline():
+            edges.append([int(x) for x in line.split()])
 
-Kraskal_edges = Kraskal(edges.copy())
-Prim_edges = Prim(edges.copy())
+    Kraskal_edges = Kraskal(edges.copy())
+    Prim_edges = Prim(edges.copy())
 
-draw_graph(Kraskal_edges, "Kraskal")
-draw_graph(Prim_edges, "Prim")
+    draw_graph(Kraskal_edges, "Kraskal")
+    draw_graph(Prim_edges, "Prim")
