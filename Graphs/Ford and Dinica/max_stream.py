@@ -43,7 +43,7 @@ def bfs(a, b):
     pass
     
 
-def Ford_Falkerson(graph, a, b):
+def Ford_Falkerson(a, b):
    
     max_flow = 0
     res_network = [[ 0 for i in range(n)] for j in range(n)]
@@ -59,20 +59,25 @@ def Ford_Falkerson(graph, a, b):
             return res_network
         
          
-edges = Ford_Falkerson(graph.copy(), 0, 3)
-print(edges)
+edges = Ford_Falkerson(0, 3)
 
-# G = nx.MultiDiGraph(edges)
+G = nx.MultiDiGraph(np.matrix(graph) - np.matrix(edges))
 
-# pos = nx.spring_layout(G, scale=5)
+pos = nx.layout(G, equidistant=True)
 
-# nx.draw_networkx_nodes(G, pos, node_size=700)
-# nx.draw_networkx_edges(G, pos, width=4, alpha = 0.5,  edge_color="b", arrows=True)      
+nx.draw_networkx_nodes(G, pos, node_size=700)
+nx.draw_networkx_edges(G, pos, width=2, alpha = 0.5,  edge_color="b", arrowstyle="->", arrowsize=15, min_target_margin=12)      
 
-# nx.draw_networkx_labels(G, pos, font_size=15, font_family="sans-serif")
-# # labels = nx.get_edge_attributes(G, 'weight')
-# # nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=labels)
+nx.draw_networkx_labels(G, pos, font_size=15, font_family="sans-serif")
 
-# plt.title("Max flow")
-# plt.show()  
+labels = nx.get_edge_attributes(G, 'weight')
+
+t_labels = dict()
+for label in labels.keys():
+    t_labels[(label[0], label[1])] = labels[label]
+
+nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=t_labels)
+
+plt.title("Max flow")
+plt.show()  
             
