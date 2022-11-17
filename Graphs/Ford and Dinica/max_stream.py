@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-visited = set()
-
 def dfs_Falk(a, b, delta, residual_network):
     
     if a == b:
@@ -150,9 +148,12 @@ for j in range(0, 4):
         
         for i in range(n):
             graph.append([int(i) for i in file.readline().split()]) 
+            
     print(f"Тест №{j}:")
+    
     queue = list()
     dist = [math.inf for i in range(n)]
+    visited = set()
 
     edges = Ford_Falkerson(a, b)
     graph_show("Фалкерсона")
