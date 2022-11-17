@@ -1,19 +1,11 @@
 # Максимальный поток в сети двумя методами 
 # (алгоритм Форда Фалкерсона, алгоритм диница)
 
+import os
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import math
-
-
-n = 6
-graph = [[0, 6, 0, 0, 0, 9],
-         [0, 0, 4, 0, 8, 5],
-         [0, 0, 0, 8, 0, 0],
-         [0, 0, 0, 0, 0, 0],
-         [0, 0, 7, 10, 0, 0], 
-         [0, 0, 0, 0, 5, 0]]
 
 visited = set()
 
@@ -51,21 +43,19 @@ def Ford_Falkerson(a, b):
         if delta > 0:
             max_flow += delta
         else:
-            print(f"Максимальный поток: {max_flow}")
+            print(f"Максимальный поток по Фалкерсону: {max_flow}")
             return res_network
         
-queue = list()
-dist = [math.inf for i in range(n)]
 
-def dfs_Din(a, b, delta, residual_network):
+def dfs_Din(a, b, delta, residual_network, delta_graph):
     
     if a == b or delta == 0:
         return delta
     
-    for neighbour in [node for node in range(len(graph[a])) if graph[a][node] > 0]:
+    for neighbour in range(len(delta_graph[a])):
 
-        if dist[a] + 1 == dist[neighbour]:
-            cur_delta = dfs_Din(neighbour, b, min(delta, graph[a][neighbour] - residual_network[a][neighbour]), residual_network)
+        if dist[a] + 1 == dist[neighbour] and delta_graph[a][neighbour] > 0:
+            cur_delta = dfs_Din(neighbour, b, min(delta, delta_graph[a][neighbour] - residual_network[a][neighbour]), residual_network, delta_graph)
             
             if cur_delta != 0:
                 
@@ -75,41 +65,43 @@ def dfs_Din(a, b, delta, residual_network):
         
     return 0
     
-def bfs(a, b, res_network):
+def bfs(a, b, res_network, delta_graph):
     
     queue.append(a)
     dist[a] = 0
     
     while queue:
         s = queue.pop(0)
-        for neighbour in [i for i in range(len(graph[s])) if graph[s][i] > 0]:
+        for neighbour in range(len(delta_graph[s])):
             
-            if res_network[s][neighbour] < graph[s][neighbour] and dist[s] != math.inf:
+            if delta_graph[s][neighbour] and res_network[s][neighbour] < delta_graph[s][neighbour] and dist[s] + 1 <  dist[neighbour]:
                 dist[neighbour] = dist[s] + 1
                 queue.append(neighbour)
     
     return dist[b] != math.inf
 
 
-def Dinica(a, b):
+def Dinica(a, b, delta_graph):
     
-    res_network = [[ 0 for i in range(n)] for j in range(n)]
+    res_network = [[0 for i in range(n)] for j in range(n)]
     
     max_flow = 0
-    while bfs(a, b, res_network):
-        print(*dist)
-        flow = dfs_Din(a, b, math.inf, res_network)
+    while bfs(a, b, res_network, delta_graph):   
+        
+        flow = dfs_Din(a, b, math.inf, res_network, delta_graph)
         
         while flow != 0:
             max_flow += flow
-            flow = dfs_Din(a, b, math.inf, res_network)
+            flow = dfs_Din(a, b, math.inf, res_network, delta_graph)
             
         for i in range(n):
            dist[i] = math.inf
-        print(*dist)
+
+        delta_graph = (np.matrix(delta_graph) - np.matrix(res_network)).tolist()
+        res_network = [[0 for i in range(n)] for j in range(n)]
 
     print(f"Максимальный поток по Динице: {max_flow}")
-    return res_network
+    return np.matrix(graph) - np.matrix(delta_graph)
 
 
 def graph_show(title):
@@ -146,13 +138,25 @@ def graph_show(title):
 
     plt.title(f"Максимальный поток {title}")
     plt.show()  
+
+for j in range(0, 4): 
     
-         
-# edges = Ford_Falkerson(0, 3)
-# graph_show("Фалкерсона")
+    graph = []
+    
+    with open(os.path.dirname(os.path.abspath(__file__)) + "/tests/test_"  + str(j) + ".txt", "r") as file:
+        
+        a, b = [int(i) for i in file.readline().split()]
+        n = int(file.readline())              
+        
+        for i in range(n):
+            graph.append([int(i) for i in file.readline().split()]) 
+    print(f"Тест №{j}:")
+    queue = list()
+    dist = [math.inf for i in range(n)]
 
-edges = Dinica(0, 3)
-#graph_show("Диница")
+    edges = Ford_Falkerson(a, b)
+    graph_show("Фалкерсона")
 
-
+    edges = Dinica(a, b, graph.copy())
+    graph_show("Диница")
             
