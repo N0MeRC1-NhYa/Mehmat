@@ -11,14 +11,15 @@ def equation(a, b, c, d):
 
 def default_run():
     default_iter_cnt = 0
-
+    res = []
     for a in range(1, 22):
         for b in range(1, 12):
             for c in range(1, 8):
                 for  d in range(1, 7):
                     default_iter_cnt += 1
                     if equation(a, b, c, d) == 0:
-                        return (default_iter_cnt, [a, b, c, d])
+                        res.append([a, b, c, d])
+    return [default_iter_cnt, res]
     
 
 
@@ -80,9 +81,10 @@ def genetic(population_size, mutation):
         
         
 def_res =default_run()
-print(f"В ходе работы полного перебора было совершено {def_res[0]} итераций. Итоговый ответ: {def_res[1]}")
+print(f"В ходе работы полного перебора было совершено {def_res[0]} итераций. Итоговый ответ: {def_res[1][0]}")
 gen_res = genetic(5, 0.5)
 print(f"В ходе работы генетического алгоритма было задействовано {gen_res[0]} эпох. Итоговый ответ: {gen_res[1]}")
+print(f"Решение генетического алгоритма содержится в полном переборе: {gen_res[1] in def_res[1]}")
 print("Построение графиков...")
 
 x, y = [], []
