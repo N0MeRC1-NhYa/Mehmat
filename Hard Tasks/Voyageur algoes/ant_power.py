@@ -49,9 +49,8 @@ def primitive():
         
         if len(visited) == len(graph):
             res.append([node, 0])
-            return [res, summ] 
+            return [res, summ + graph[node][0]] 
 
-prev_min = math.inf
 
 def brute_force(vis, i, summ):
     
@@ -60,6 +59,7 @@ def brute_force(vis, i, summ):
     vis.append(i)
     
     if len(vis) == len(graph):
+        summ += graph[vis[-1]][0]
         if prev_min[-1] > summ:
             prev_min.append(summ)
             return vis.copy()
@@ -100,7 +100,8 @@ def genetic(population_size = 50, max_epoch =10_000, population_cut = 0.25, muta
         epoch += 1
         distances = []
         for i in range(population_size):
-            distances.append((i, sum([graph[x][y] for x, y in zip(population[i][::], population[i][1::]) if x != "" and y != ""])))
+            distances.append([i, sum([graph[x][y] for x, y in zip(population[i][::], population[i][1::]) if x != "" and y != ""])])
+            distances[i][1] += graph[population[i][-1]][0]
         best_population = [population[i] for i, dist in sorted(distances, key = lambda x:x[1])[:int(population_size * population_cut)]]
         
         for i in range(population_size):
@@ -120,6 +121,56 @@ def genetic(population_size = 50, max_epoch =10_000, population_cut = 0.25, muta
             
     return [population[sorted(distances, key= lambda x:x[1])[0][0]], sorted(distances, key= lambda x:x[1])[0][1]]
     
+    
+def ant(a = 2, b = 4, k = 0.5, evap = 0.75, max_ants = 1_00):
+    
+    def ant_path():
+        path = []
+        
+        nodes = set([i for i in range(1, len(graph))])
+        
+        start_node = 0
+        
+        while nodes:
+            
+            p = dict()
+            
+            for i in nodes:
+                if i != start_node:
+                    p[i] = pheromone[start_node][i] ** a + 1 / (graph[start_node][i] ** b)
+            
+            prob_sum = sum([i for i in p.values()])
+            
+            
+            r = np.random.random()
+            
+            cur_sum = 0
+            for i in p.keys():
+                cur_sum += p[i] / prob_sum
+                if cur_sum > r:
+                    path.append([start_node, i])
+                    start_node = i
+                    nodes.remove(i)
+                    break
+        path.append([path[-1][1], 0])
+        return path                 
+                
+    
+    pheromone = [[0 for i in range(len(graph))] for i in range(len(graph))]
+    
+    ant = 0
+    while ant < max_ants:
+        
+        ant += 1
+        path = ant_path()
+        for i, j in path:
+            pheromone[i][j] += k / graph[i][j]
+            pheromone[j][i] += k / graph[i][j]
+        
+        pheromone = [[max(pheromone[i][j] - evap, 0) for i in range(len(pheromone))] for j in range(len(pheromone))]
+    path = ant_path()
+    return [path, sum([graph[x][y] for x, y in path if x != "" and y != ""])]
+
 def btn_pressed(evt):
     dots.append((evt.xdata, evt.ydata))
     evt.inaxes.plot(evt.xdata, evt.ydata, 'o')
@@ -172,3 +223,25 @@ temp.append((temp[-1][1], temp[0][0]))
 print(f"Расстояние по генетическому алгоритму: {dist}")
 plot(temp, "Генетический алгоритм")
 
+min_ant_dist = math.inf
+min_ant_path = []
+op_a = 0
+op_b = 0
+op_k = 0
+op_evap = 0
+
+for a in np.arange(0.5, 3, 0.5):
+    for b in np.arange(0.5, 3, 0.5):
+        for k in np.arange(0.2, 2, 0.2):
+            for evap in np.arange(0.25, 2, 0.25):
+                ant_, dist = ant(a, b, k, evap)
+                if dist < min_ant_dist:
+                    op_a = a
+                    op_b = b
+                    op_k = k
+                    op_evap = evap
+                    min_ant_dist = dist
+                    min_ant_path = ant_
+                
+print(f"Расстояние по муравьиному алгоритму: {min_ant_dist}\t Оптимальные параметры: a = {op_a} b = {op_b} k = {op_k}  evap = {op_evap}")
+plot(min_ant_path, "Муравьиный алгоритм")
