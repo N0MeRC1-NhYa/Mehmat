@@ -77,7 +77,7 @@ def brute_force(vis, i, summ):
             
     return cur_min 
     
-def genetic(population_size = 50, max_epoch =10_000, population_cut = 0.25, mutation = 0.3):
+def genetic(population_size = 50, max_epoch =100, population_cut = 0.25, mutation = 0.3):
     
     def crossover(m, f):
         border = np.random.randint(0, len(graph))
@@ -101,7 +101,7 @@ def genetic(population_size = 50, max_epoch =10_000, population_cut = 0.25, muta
         distances = []
         for i in range(population_size):
             distances.append([i, sum([graph[x][y] for x, y in zip(population[i][::], population[i][1::]) if x != "" and y != ""])])
-            distances[i][1] += graph[population[i][-1]][0]
+            distances[i][1] += graph[population[i][-1]][population[i][0]]
         best_population = [population[i] for i, dist in sorted(distances, key = lambda x:x[1])[:int(population_size * population_cut)]]
         
         for i in range(population_size):
@@ -114,12 +114,15 @@ def genetic(population_size = 50, max_epoch =10_000, population_cut = 0.25, muta
            if male_r < mutation:
                male_p = population[np.random.randint(0, population_size)]
             
-           if male_r < mutation:
+           if female_r < mutation:
                female_p = population[np.random.randint(0, population_size)]
             
            population[i] = crossover(male_p, female_p)
-            
-    return [population[sorted(distances, key= lambda x:x[1])[0][0]], sorted(distances, key= lambda x:x[1])[0][1]]
+    
+    result = population[sorted(distances, key= lambda x:x[1])[0][0]]
+    result.append(result[0])
+    
+    return [result, sum([graph[x][y] for x, y in zip(result[::], result[1::]) if x != "" and y != ""])]
     
     
 def ant(a = 2, b = 4, k = 0.5, evap = 0.75, max_ants = 1_00):
@@ -217,10 +220,25 @@ temp.append((temp[-1][1], temp[0][0]))
 print(f"Расстояние по полному перебору: {prev_min[-1]}")
 plot(temp, "Полный перебор")
 
-gen, dist = genetic()
-temp = [(int(x), int(y)) for x, y in zip(gen[::], gen[1::]) if x != "" and y != "" ] 
-temp.append((temp[-1][1], temp[0][0]))
-print(f"Расстояние по генетическому алгоритму: {dist}")
+min_gen_dist = math.inf
+min_gen_path = []
+op_p_size = 0
+op_p_cut = 0
+op_p_mut = 0
+
+for p_size in np.arange(15, 50, 5):
+    for p_cut in np.arange(0.1, 0.4, 0.05):
+        for p_mut in np.arange(0.15, 0.5, 0.05):
+            gen, dist = genetic(population_size=p_size, population_cut=p_cut, mutation=p_mut)
+            if dist < min_gen_dist:
+                op_p_size = p_size
+                op_p_cut = p_cut
+                op_p_mut = p_mut
+                min_gen_dist = dist
+                min_gen_path = gen 
+
+temp = [(int(x), int(y)) for x, y in zip(min_gen_path[::], min_gen_path[1::]) if x != "" and y != "" ] 
+print(f"Расстояние по генетическому алгоритму: {min_gen_dist} Оптимальные параметры: размер популяции = {op_p_size} процент особей для размножения = {int(op_p_cut * 100)}% вероятность мутации = {int(op_p_mut * 100)}%")
 plot(temp, "Генетический алгоритм")
 
 min_ant_dist = math.inf
